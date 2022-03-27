@@ -9,7 +9,7 @@
 
 
 
-REPO_PATH=/home/shannon/coref-tf
+REPO_PATH=.
 export TPU_NAME=tf-tpu
 export PYTHONPATH="$PYTHONPATH:$REPO_PATH"
 SQUAD_DIR=gs://qa_tasks/squad2

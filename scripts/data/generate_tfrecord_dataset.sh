@@ -11,7 +11,7 @@
 
 
 
-REPO_PATH=/home/lixiaoya/coref-tf
+
 export PYTHONPATH=$REPO_PATH
 
 source_dir=$1

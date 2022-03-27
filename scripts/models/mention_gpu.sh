@@ -9,7 +9,7 @@
 
 
 
-REPO_PATH=/home/lixiaoya/xiaoy_tf
+REPO_PATH=.
 export PYTHONPATH="$PYTHONPATH:$REPO_PATH"
 
 output_dir=/xiaoya/mention_proposal_output

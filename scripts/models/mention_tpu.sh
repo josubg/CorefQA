@@ -9,7 +9,7 @@
 
 
 
-REPO_PATH=/home/xiaoyli1110/xiaoya/Coref-tf
+REPO_PATH=.
 export PYTHONPATH="$PYTHONPATH:$REPO_PATH"
 export TPU_NAME=tensorflow-tpu
 export TPU_ZONE=europe-west4-a

@@ -18,28 +18,34 @@
 # 
 
 
-path_to_ontonotes5.0_directory=$1
+path_to_ontonotes_directory=$1
 path_to_save_processed_data_directory=$2
 language=$3
 
 
 dlx() {
-  wget -P $path_to_save_processed_data_directory $1/$2
+  cp $1/$2 $path_to_save_processed_data_directory 
   tar -xvzf $path_to_save_processed_data_directory/$2 -C $path_to_save_processed_data_directory
   rm $path_to_save_processed_data_directory/$2
 }
 
 
-conll_url=http://conll.cemantix.org/2012/download
+conll_url=conll2012
 dlx $conll_url conll-2012-train.v4.tar.gz
 dlx $conll_url conll-2012-development.v4.tar.gz
 dlx $conll_url/test conll-2012-test-key.tar.gz
 dlx $conll_url/test conll-2012-test-official.v9.tar.gz
 
-dlx $conll_url conll-2012-scripts.v3.tar.gz
-dlx http://conll.cemantix.org/download reference-coreference-scorers.v8.01.tar.gz
+find . -type d -name "arabic" -exec rm -rf "{}" \;
+find . -type d -name "chinese" -exec rm -rf "{}" \;
 
-bash $path_to_save_processed_data_directory/conll-2012/v3/scripts/skeleton2conll.sh -D $path_to_ontonotes5.0_directory/data/files/data $path_to_save_processed_data_directory/conll-2012
+dlx $conll_url conll-2012-scripts.v3.tar.gz
+dlx $conll_url reference-coreference-scorers.v8.01.tar.gz
+
+virtualenv -p python2 sloppyenv
+source sloppyenv/bin/activate
+
+bash $path_to_save_processed_data_directory/conll-2012/v3/scripts/skeleton2conll.sh -D $path_to_ontonotes_directory/data/files/data $path_to_save_processed_data_directory/conll-2012
 
 function compile_partition() {
     rm -f $2.$5.$3$4
@@ -54,4 +60,6 @@ function compile_language() {
 
 compile_language $language
 
+deactivate
+rm -rf sloopyenv
 

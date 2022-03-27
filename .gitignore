@@ -132,3 +132,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+#
+/conll2012/
+/data/
+.idea
