@@ -83,7 +83,6 @@ check the mention in the subword list:
 """
 
 
-
 def prepare_train_dataset(input_file, output_data_dir, output_filename, window_size, num_window, 
     tokenizer=None, vocab_file=None, language="english", max_doc_length=None, genres=None, 
     max_num_mention=10, max_num_cluster=30, demo=False, lowercase=False):
@@ -399,11 +398,11 @@ def construct_sliding_windows(sequence_length, sliding_window_size):
     return sliding_windows
 
 
-
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--source_files_dir", default="/home/lixiaoya/data", type=str, required=True)
     parser.add_argument("--target_output_dir", default="/home/lixiaoya/tfrecord_data", type=str, required=True)
+    parser.add_argument("--filename_format", default="{}.{}.v4_gold_conll", type=str, required=True)
     parser.add_argument("--num_window", default=5, type=int, required=True)
     parser.add_argument("--window_size", default=64, type=int, required=True)
     parser.add_argument("--max_num_mention", default=30, type=int)
@@ -435,23 +434,25 @@ def main():
     print("*"*60)
 
     for data_sign in ["train", "dev", "test"]:
-        source_data_file = os.path.join(args_config.source_files_dir, "{}.{}.v4_gold_conll".format(data_sign, args_config.language))
-        output_filename = "{}.overlap.corefqa".format(data_sign)
-        
-        if args_config.demo:
-            if args_config.lowercase:
-                output_filename="demo.lowercase.{}.overlap.corefqa".format(data_sign)
-            else:
-                output_filename="demo.{}.overlap.corefqa".format(data_sign)
+        try:
+            source_data_file = os.path.join(args_config.source_files_dir,args_config.filename_format .format(data_sign, args_config.language))
+            output_filename = "{}.overlap.corefqa".format(data_sign)
 
-        print("$"*60)
-        print("generate {}/{}".format(args_config.target_output_dir, output_filename))
-        prepare_train_dataset(source_data_file, args_config.target_output_dir, output_filename, args_config.window_size, 
-            args_config.num_window, vocab_file=args_config.vocab_file, language=args_config.language, 
-            max_doc_length=args_config.max_doc_length, genres=args_config.genres, max_num_mention=args_config.max_num_mention,
-            max_num_cluster=args_config.max_num_cluster, demo=args_config.demo, lowercase=args_config.lowercase)
+            if args_config.demo:
+                if args_config.lowercase:
+                    output_filename="demo.lowercase.{}.overlap.corefqa".format(data_sign)
+                else:
+                    output_filename="demo.{}.overlap.corefqa".format(data_sign)
 
-
+            print("$"*60)
+            print("generate {}/{}".format(args_config.target_output_dir, output_filename))
+            prepare_train_dataset(source_data_file, args_config.target_output_dir, output_filename, args_config.window_size,
+                args_config.num_window, vocab_file=args_config.vocab_file, language=args_config.language,
+                max_doc_length=args_config.max_doc_length, genres=args_config.genres, max_num_mention=args_config.max_num_mention,
+                max_num_cluster=args_config.max_num_cluster, demo=args_config.demo, lowercase=args_config.lowercase)
+        except FileNotFoundError as ex:
+            print(f"file skipped {source_data_file}")
+            print(f"Reason: {ex}")
 
 
 if __name__ == "__main__":
@@ -472,6 +473,3 @@ if __name__ == "__main__":
     # --language english \
     # --max_doc_length 600 
     # 
-
-
-
