@@ -12,18 +12,20 @@
 
 
 
-export PYTHONPATH=$REPO_PATH
+export PYTHONPATH=${REPO_PATH}
 
 source_dir=$1
 target_dir=$2
 vocab_file=$3
+filename_format=$4
 
-mkdir -p ${target_dir}
+mkdir -p "${target_dir}"
 
 
-python3 ${REPO_PATH}/run/build_dataset_to_tfrecord.py \
+python3 "${REPO_PATH}/run/build_dataset_to_tfrecord.py" \
 --source_files_dir $source_dir \
 --target_output_dir $target_dir \
+--filename_format $filename_format \
 --num_window 2 \
 --window_size 64 \
 --max_num_mention 50 \
