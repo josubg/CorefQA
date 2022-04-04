@@ -9,12 +9,8 @@
 
 
 
-REPO_PATH=.
+
 export TPU_NAME=tf-tpu
-export PYTHONPATH="$PYTHONPATH:$REPO_PATH"
-SQUAD_DIR=gs://qa_tasks/squad2
-BERT_DIR=gs://pretrained_mlm_checkpoint/spanbert_large_tf
-OUTPUT_DIR=gs://corefqa_output_squad/spanbert_large_squad2_2e-5  
 
 
 python3 ${REPO_PATH}/run/run_squad.py \
