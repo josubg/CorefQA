@@ -17,7 +17,8 @@ export PYTHONPATH=${REPO_PATH}
 source_dir=$1
 target_dir=$2
 vocab_file=$3
-filename_format=$4
+language=$4
+filename_format=$5
 
 mkdir -p "${target_dir}"
 
@@ -31,5 +32,5 @@ python3 "${REPO_PATH}/run/build_dataset_to_tfrecord.py" \
 --max_num_mention 50 \
 --max_num_cluster 40 \
 --vocab_file $vocab_file \
---language english \
+--language $language \
 --max_doc_length 600 

@@ -435,7 +435,7 @@ def main():
 
     for data_sign in ["train", "dev", "test"]:
         try:
-            source_data_file = os.path.join(args_config.source_files_dir,args_config.filename_format .format(data_sign, args_config.language))
+            source_data_file = os.path.join(args_config.source_files_dir,args_config.filename_format.format(data_sign, args_config.language))
             output_filename = "{}.overlap.corefqa".format(data_sign)
 
             if args_config.demo:
