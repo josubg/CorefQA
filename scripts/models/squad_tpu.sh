@@ -2,15 +2,9 @@
 # -*- coding: utf-8 -*- 
 
 
-
 # author: xiaoy li 
 # description:
 # finetune the spanbert model on squad 2.0 for data augment.  
-
-
-
-
-export TPU_NAME=tf-tpu
 
 
 python3 ${REPO_PATH}/run/run_squad.py \
