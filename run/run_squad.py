@@ -34,7 +34,8 @@ flags = tf.flags
 
 FLAGS = flags.FLAGS
 
-
+for name in []:
+    delattr(flags.FLAGS,name)
 ## Required parameters
 flags.DEFINE_string(
   "bert_config_file", None,
@@ -1279,7 +1280,16 @@ def main(_):
 
 
 if __name__ == "__main__":
-  flags.mark_flag_as_required("vocab_file")
-  flags.mark_flag_as_required("bert_config_file")
-  flags.mark_flag_as_required("output_dir")
-  tf.app.run()
+    try:
+      flags.mark_flag_as_required("vocab_file")
+    except DuplicateFlagError:
+        pass
+    try:
+      flags.mark_flag_as_required("bert_config_file")
+    except DuplicateFlagError:
+      pass
+    try:
+      flags.mark_flag_as_required("output_dir")
+    except DuplicateFlagError:
+      pass
+    tf.app.run()
