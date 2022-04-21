@@ -1,1 +1,4 @@
 pyhocon
+tensorboard==1.15.0
+tensorflow-estimator==1.15.1
+numpy==1.19.5
