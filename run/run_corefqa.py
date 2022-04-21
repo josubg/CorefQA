@@ -197,12 +197,12 @@ def main(_):
         tf.logging.info("Average precision: {:.4f}, Average recall: {:.4f}, Average F1 {:.4f}".format(p, r, f))
 
 
-
+SEED = FLAGS.seed
 if __name__ == '__main__':
     # set the random seed. 
-    random.seed(FLAGS.seed)
-    np.random.seed(FLAGS.seed)
-    tf.set_random_seed(FLAGS.seed)
+    random.seed(SEED)
+    np.random.seed(SEED)
+    tf.set_random_seed(SEED)
     # start train/evaluate the model.
     tf.app.run()
 
