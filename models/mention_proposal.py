@@ -3,13 +3,13 @@
 
 
 
-# author: xiaoy li 
+# author: xiaoy li
 # description:
 # the mention proposal model for pre-training the Span-BERT model. 
 
 
 import os
-import sys 
+import sys
 
 repo_path = "/".join(os.path.realpath(__file__).split("/")[:-2])
 if repo_path not in sys.path:
@@ -22,7 +22,7 @@ from bert import modeling
 
 class MentionProposalModel(object):
     def __init__(self, config):
-        self.config = config 
+        self.config = config
         self.bert_config = modeling.BertConfig.from_json_file(config.bert_config_file)
         self.bert_config.hidden_dropout_prob = config.dropout_rate
 
@@ -35,7 +35,7 @@ class MentionProposalModel(object):
                 e.g., (flat_input_ids, flat_doc_overlap_input_mask, flat_sentence_map, text_len, speaker_ids, gold_starts, gold_ends, cluster_ids)
             is_training: True/False is in the training process. 
         """
-        self.use_tpu = use_tpu 
+        self.use_tpu = use_tpu
         self.dropout = self.get_dropout(self.config.dropout_rate, is_training)
 
         flat_input_ids, flat_doc_overlap_input_mask, flat_sentence_map, text_len, speaker_ids, gold_starts, gold_ends, cluster_ids = instance
@@ -48,30 +48,30 @@ class MentionProposalModel(object):
         # cluster_ids/speaker_ids is not used in the mention proposal model.
 
         flat_input_ids = tf.math.maximum(flat_input_ids, tf.zeros_like(flat_input_ids, tf.int32)) # (num_window * window_size)
-        
-        flat_doc_overlap_input_mask = tf.where(tf.math.greater_equal(flat_doc_overlap_input_mask, 0), 
+
+        flat_doc_overlap_input_mask = tf.where(tf.math.greater_equal(flat_doc_overlap_input_mask, 0),
             x=tf.ones_like(flat_doc_overlap_input_mask, tf.int32), y=tf.zeros_like(flat_doc_overlap_input_mask, tf.int32)) # (num_window * window_size)
         # flat_doc_overlap_input_mask = tf.math.maximum(flat_doc_overlap_input_mask, tf.zeros_like(flat_doc_overlap_input_mask, tf.int32))
         flat_sentence_map = tf.math.maximum(flat_sentence_map, tf.zeros_like(flat_sentence_map, tf.int32)) # (num_window * window_size)
-        
+
         gold_start_end_mask = tf.cast(tf.math.greater_equal(gold_starts, tf.zeros_like(gold_starts, tf.int32)), tf.bool) # (max_num_mention)
         gold_start_index_labels = self.boolean_mask_1d(gold_starts, gold_start_end_mask, name_scope="gold_starts", use_tpu=self.use_tpu) # (num_of_mention)
         gold_end_index_labels = self.boolean_mask_1d(gold_ends, gold_start_end_mask, name_scope="gold_ends", use_tpu=self.use_tpu) # (num_of_mention)
 
         text_len = tf.math.maximum(text_len, tf.zeros_like(text_len, tf.int32)) # (num_of_non_empty_window)
-        num_subtoken_in_doc = tf.math.reduce_sum(text_len) # the value should be num_subtoken_in_doc 
+        num_subtoken_in_doc = tf.math.reduce_sum(text_len) # the value should be num_subtoken_in_doc
 
         input_ids = tf.reshape(flat_input_ids, [-1, self.config.window_size]) # (num_window, window_size)
         input_mask = tf.ones_like(input_ids, tf.int32) # (num_window, window_size)
 
-        model = modeling.BertModel(config=self.bert_config, is_training=is_training, 
-            input_ids=input_ids, input_mask=input_mask, 
+        model = modeling.BertModel(config=self.bert_config, is_training=is_training,
+            input_ids=input_ids, input_mask=input_mask,
             use_one_hot_embeddings=False, scope='bert')
 
         doc_overlap_window_embs = model.get_sequence_output() # (num_window, window_size, hidden_size)
         doc_overlap_input_mask = tf.reshape(flat_doc_overlap_input_mask, [self.config.num_window, self.config.window_size]) # (num_window, window_size)
 
-        doc_flat_embs = self.transform_overlap_windows_to_original_doc(doc_overlap_window_embs, doc_overlap_input_mask) 
+        doc_flat_embs = self.transform_overlap_windows_to_original_doc(doc_overlap_window_embs, doc_overlap_input_mask)
         doc_flat_embs = tf.reshape(doc_flat_embs, [-1, self.config.hidden_size]) # (num_subtoken_in_doc, hidden_size)
 
         expand_start_embs = tf.tile(tf.expand_dims(doc_flat_embs, 1), [1, num_subtoken_in_doc, 1]) # (num_subtoken_in_doc, num_subtoken_in_doc, hidden_size)
@@ -101,8 +101,8 @@ class MentionProposalModel(object):
         span_loss, span_sequence_probabilities = self.compute_score_and_loss(span_sequence_logits, gold_span_sequence_labels)
         # span_loss -> a scalar 
         # span_sequence_probabilities -> (num_subtoken_in_doc * num_subtoken_in_doc)
-        
-        total_loss = self.config.loss_start_ratio * start_loss + self.config.loss_end_ratio * end_loss + self.config.loss_span_ratio * span_loss 
+
+        total_loss = self.config.loss_start_ratio * start_loss + self.config.loss_end_ratio * end_loss + self.config.loss_span_ratio * span_loss
         return total_loss, start_sequence_probabilities, end_sequence_probabilities, span_sequence_probabilities
 
 
@@ -130,8 +130,8 @@ class MentionProposalModel(object):
                 if the element[i][j] equals to 1, this subtokens from $i$ to $j$ is a mention. 
         """
         text_len = tf.math.maximum(pad_text_len, tf.zeros_like(pad_text_len, tf.int32)) # (num_of_non_empty_window)
-        num_subtoken_in_doc = tf.math.reduce_sum(text_len) # the value should be num_subtoken_in_doc 
-        
+        num_subtoken_in_doc = tf.math.reduce_sum(text_len) # the value should be num_subtoken_in_doc
+
         gold_start_end_mask = tf.cast(tf.math.greater_equal(pad_gold_start_index_labels, tf.zeros_like(pad_gold_start_index_labels, tf.int32)), tf.bool) # (max_num_mention)
         gold_start_index_labels = self.boolean_mask_1d(pad_gold_start_index_labels, gold_start_end_mask, name_scope="gold_starts", use_tpu=self.use_tpu) # (num_of_mention)
         gold_end_index_labels = self.boolean_mask_1d(pad_gold_end_index_labels, gold_start_end_mask, name_scope="gold_ends", use_tpu=self.use_tpu) # (num_of_mention)
@@ -154,7 +154,11 @@ class MentionProposalModel(object):
         """
         gold_labels_pos = tf.reshape(gold_index_labels, [-1, 1]) # (num_of_mention, 1)
         gold_value = tf.reshape(tf.ones_like(gold_index_labels), [-1]) # (num_of_mention)
-        label_shape = tf.Variable(expect_length_of_labels) 
+
+        print(f'------------------------------ {expect_length_of_labels}, {expect_length_of_labels.shape}')
+        labels_length = lambda: expect_length_of_labels
+        label_shape = tf.Variable(initial_value=labels_length, name='labels_length')
+
         label_shape = tf.reshape(label_shape, [1]) # [1]
         gold_sequence_labels = tf.cast(tf.scatter_nd(gold_labels_pos, gold_value, label_shape), tf.int32) # (num_subtoken_in_doc)
         return gold_sequence_labels
@@ -171,10 +175,10 @@ class MentionProposalModel(object):
             gold_start_index_labels: a tf.int32 Tensor with mention start position index in the original document. 
             gold_end_index_labels: a tf.int32 Tensor with mention end position index in the original document. 
             expect_length_of_labels: a scalar, should be the same with num_subtoken_in_doc
-        """ 
+        """
         gold_span_index_labels = tf.stack([gold_start_index_labels, gold_end_index_labels], axis=1) # (num_of_mention, 2)
         gold_span_value = tf.reshape(tf.ones_like(gold_start_index_labels, tf.int32), [-1]) # (num_of_mention)
-        gold_span_label_shape = tf.Variable([expect_length_of_labels, expect_length_of_labels]) 
+        gold_span_label_shape = tf.Variable([expect_length_of_labels, expect_length_of_labels])
         gold_span_label_shape = tf.reshape(gold_span_label_shape, [-1])
 
         gold_span_sequence_labels = tf.cast(tf.scatter_nd(gold_span_index_labels, gold_span_value, gold_span_label_shape), tf.int32) # (num_subtoken_in_doc, num_subtoken_in_doc)
@@ -229,7 +233,7 @@ class MentionProposalModel(object):
         doc_overlap_window_embs = tf.reshape(doc_overlap_window_embs, [-1, self.config.hidden_size]) # (num_window * window_size, hidden_size)
         original_doc_embs = tf.gather(doc_overlap_window_embs, global_input_mask_index) # (num_subtoken_in_doc, hidden_size)
 
-        return original_doc_embs 
+        return original_doc_embs
 
 
     def ffnn(self, inputs, hidden_size, output_size, dropout=None, name_scope="fully-conntected-neural-network",
@@ -250,7 +254,7 @@ class MentionProposalModel(object):
             if dropout is not None:
                 outputs = tf.nn.dropout(outputs, dropout)
 
-        return outputs 
+        return outputs
 
 
     def get_dropout(self, dropout_rate, is_training):
@@ -261,7 +265,7 @@ class MentionProposalModel(object):
         """
         Desc:
             return the size of input x in DIM. 
-        """ 
+        """
         return x.get_shape()[dim].value or tf.shape(x)[dim]
 
 
