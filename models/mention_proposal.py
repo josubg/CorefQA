@@ -157,7 +157,7 @@ class MentionProposalModel(object):
 
         print(f'------------------------------ {expect_length_of_labels}, {expect_length_of_labels.shape}')
         labels_length = lambda: expect_length_of_labels
-        label_shape = tf.Variable(initial_value=labels_length, name='labels_length', dtype=tf.int64)
+        label_shape = tf.Variable(initial_value=labels_length, name='labels_length', dtype=tf.int32)
 
         label_shape = tf.reshape(label_shape, [1]) # [1]
         gold_sequence_labels = tf.cast(tf.scatter_nd(gold_labels_pos, gold_value, label_shape), tf.int32) # (num_subtoken_in_doc)
