@@ -57,9 +57,9 @@ class MentionProposalModel(object):
         gold_start_end_mask = tf.cast(tf.math.greater_equal(gold_starts, tf.zeros_like(gold_starts, tf.int32)), tf.bool) # (max_num_mention)
         gold_start_index_labels = self.boolean_mask_1d(gold_starts, gold_start_end_mask, name_scope="gold_starts", use_tpu=self.use_tpu) # (num_of_mention)
         gold_end_index_labels = self.boolean_mask_1d(gold_ends, gold_start_end_mask, name_scope="gold_ends", use_tpu=self.use_tpu) # (num_of_mention)
-        print(f"text length:  {text_len} | {text_len.numpy()}")
+        print(f"text length:  {text_len} | {text_len.eval()}")
         text_len = tf.math.maximum(text_len, tf.zeros_like(text_len, tf.int32)) # (num_of_non_empty_window)
-        print(f"text length(MAX):  {text_len} | {text_len.numpy()}")
+        print(f"text length(MAX):  {text_len} | {text_len.eval()}")
         num_subtoken_in_doc = tf.math.reduce_sum(text_len) # the value should be num_subtoken_in_doc
 
         input_ids = tf.reshape(flat_input_ids, [-1, self.config.window_size]) # (num_window, window_size)
@@ -155,7 +155,7 @@ class MentionProposalModel(object):
         """
         gold_labels_pos = tf.reshape(gold_index_labels, [-1, 1]) # (num_of_mention, 1)
         gold_value = tf.reshape(tf.ones_like(gold_index_labels), [-1])# (num_of_mention)
-        print(f'------------------------------ {expect_length_of_labels.numpy()}')
+        print(f'------------------------------ {expect_length_of_labels.eval()}')
         print(f'------------------------------ {expect_length_of_labels} | {expect_length_of_labels.shape}')
         labels_length = lambda: expect_length_of_labels
         label_shape = tf.Variable(labels_length, name='labels_length', dtype=tf.int32)
