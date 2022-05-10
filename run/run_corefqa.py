@@ -31,7 +31,7 @@ try:
     flags.DEFINE_integer("keep_checkpoint_max", 30, "How many checkpoint models keep at most.")
     flags.DEFINE_integer("save_checkpoints_steps", 500, "Save checkpoint every X updates steps.")
 
-
+    flags.DEFINE_string("FLAGS.eval_dir",'', "MISSING")
     flags.DEFINE_string("train_file", "/home/lixiaoya/train.english.tfrecord", "TFRecord file for training. E.g., train.english.tfrecord")
     flags.DEFINE_string("dev_file", "/home/lixiaoya/dev.english.tfrecord", "TFRecord file for validating. E.g., dev.english.tfrecord")
     flags.DEFINE_string("test_file", "/home/lixiaoya/test.english.tfrecord", "TFRecord file for testing. E.g., test.english.tfrecord")
