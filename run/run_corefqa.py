@@ -18,10 +18,10 @@ from func_builders.model_fn_builder import model_fn_builder
 from func_builders.input_fn_builder import file_based_input_fn_builder
 
 
-tf.app.flags.DEFINE_string('f', '', 'kernel')
 flags = tf.app.flags
 
 try:
+    flags.DEFINE_string('f', '', 'kernel')
     flags.DEFINE_string("output_dir", "data", "The output directory.")
     flags.DEFINE_string("bert_config_file", "/home/uncased_L-2_H-128_A-2/config.json", "The config json file corresponding to the pre-trained BERT model.")
     flags.DEFINE_string("init_checkpoint", "/home/uncased_L-2_H-128_A-2/bert_model.ckpt", "Initial checkpoint (usually from a pre-trained BERT model).")
@@ -81,7 +81,6 @@ format = '%(asctime)s - %(levelname)s - %(name)s - %(message)s'
 logging.basicConfig(format=format, filename=FLAGS.logfile_path, level=logging.INFO)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-
 
 
 def main(_):
